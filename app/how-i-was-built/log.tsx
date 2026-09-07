@@ -830,6 +830,17 @@ const ROWS: Row[] = [
       'Reuse the tester-vetted build, don\'t rebuild: production shipped the exact binary the closed testers ran, so there were no new surprises and no extra build cost.',
     ],
   },
+  {
+    feature: 'A public /status page — live health of the whole stack',
+    date: '7 Sep 2026',
+    work: 'A new public page at /status shows whether Camino and its dependencies are up (app, authentication, database), green/red, auto-refreshing every 30s. It is fed by a new GET /api/status endpoint that probes each live dependency in parallel (with per-check timeouts) and returns HTTP 503 if any critical one is down, 200 otherwise. The endpoint checks whatever Supabase the app is actually pointed at (reads EXPO_PUBLIC_SUPABASE_URL), so it follows a backend migration automatically. Pure decision logic (is-the-product-up, and what HTTP code an uptime monitor should see) lives in lib/status.ts with unit tests; the route does the I/O and the page does the rendering.',
+    decisions: [
+      'One endpoint, whole stack: a status check that 503s on any critical failure lets a single uptime monitor cover everything — which matters because the monitoring provider\'s free tier allows only one monitor. No per-service monitor sprawl.',
+      'Check what the app actually uses, not a hardcoded host: reading the app\'s own Supabase URL means the status page stays truthful across backend changes with zero edits.',
+      'Public on purpose: in the same show-our-work spirit as the changelog, an open status page is a small honesty signal — and a useful one for anyone (including a future buyer) checking whether the thing is alive.',
+      '"Reachable" vs "healthy" per check: the database probe treats any non-5xx as up (401/403 still prove it\'s serving), while auth requires a real 200 — so a check is neither falsely green nor falsely red.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {
