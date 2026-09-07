@@ -841,6 +841,17 @@ const ROWS: Row[] = [
       '"Reachable" vs "healthy" per check: the database probe treats any non-5xx as up (401/403 still prove it\'s serving), while auth requires a real 200 — so a check is neither falsely green nor falsely red.',
     ],
   },
+  {
+    feature: 'The backend moved to infrastructure we run — $0, and it never sleeps',
+    date: '7 Sep 2026',
+    work: 'The database and sign-in moved off the managed hosting\'s free tier onto a small always-free cloud server we run ourselves. The trigger: the free tier auto-paused after about a week of low activity — and keep-alive pings never satisfied its rule — which is the wrong behaviour for a tool people return to over months of a move; the paid tier was poor value at this traffic. The full stack (Postgres, authentication, storage, API gateway) now runs on that server behind auto-renewing TLS, at no monthly cost, on the same public API address as before. Every account and every saved roadmap came across, and all three sign-in methods (Apple, Google, email) were wired and tested against the new box before the app was pointed at it.',
+    decisions: [
+      'Own the uptime floor: a backend that goes to sleep after a quiet week is a real failure for a months-long planning companion — self-hosting removes the pause entirely and costs nothing, chosen over a paid managed plan that solved the symptom at a price the traffic didn\'t justify.',
+      'Flip behind a rollback: the old managed backend was left intact and one config change away the whole time, so the migration was reversible at every step; the switch was three environment variables plus a redeploy and an over-the-air update.',
+      'Verify each path before trusting it: every sign-in method and a real roadmap read/write were exercised against the new server first. The one bug that slipped through — the imported database\'s API schema cache was stale, so roadmaps briefly wouldn\'t load even though sign-in worked — was diagnosed and fixed the same hour.',
+      'Honest cost: a backend swap resets active sessions, so people signed in once more afterward — but no roadmap was lost, and the trade for a backend that never sleeps was worth naming rather than hiding.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {
