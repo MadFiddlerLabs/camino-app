@@ -2,7 +2,7 @@
 # server-side by scripts/e2e/seed.mjs). Uses Maestro's DOCUMENTED iOS pattern for the
 # "Open in 'Get Camino'?" SpringBoard confirmation.
 #
-# ⚠️ TAGGED `authed` AND EXCLUDED FROM CI (see .github/workflows/e2e-ios.yml). Reason:
+# ⚠️ TAGGED `authed` AND EXCLUDED from the gate (run with --exclude-tags=authed). Reason:
 # opening iOS deep links via Maestro on GitHub macOS runners is a documented, unresolved
 # flake — the "Open in app" alert isn't in the app's accessibility tree on Maestro 2.x /
 # iOS 18.x, so it can't be tapped (Maestro issue #2610; confirmed live in our runs 2–4).

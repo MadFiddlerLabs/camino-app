@@ -43,8 +43,9 @@ Layers, and when they run:
 - **Web E2E** (Playwright, `tests-e2e/`) — real browser vs a **deployed** env. Runs
   **automatically on every deploy** (`deploy.sh`, against the unique URL). Staging = all 13;
   production = the 8 public only.
-- **Mobile E2E** (Maestro, `.maestro/`) — iOS simulator. Runs on **big builds only** (manual
-  `e2e-ios` workflow before a store-candidate build).
+- **Mobile E2E** (Maestro, `.maestro/`) — iOS simulator. Runs on **big builds only**, **locally**:
+  the `e2e-ios` CI workflow was deleted 2026-10-19 (its seed step needed the retired staging
+  backend). The flows themselves are unchanged.
 
 ---
 
@@ -246,7 +247,7 @@ actually are. "Covered" means automated; honest exceptions are named, not hidden
 | 6 | Email loop (welcome-once, digest, unsubscribe, nudge) | Digest logic units (6) + unsubscribe-token unit + render snapshots | **PARTIAL** | The welcome-once dedupe (a real 3×-send bug) and the route handlers have NO regression test — top of gap list §4D |
 | 7 | Account deletion · feedback route | Nothing automated (each manually E2E-verified once) | **GAP** | Honest exception for now; right layer = handler integration tests with mocked Supabase/Resend, §4D |
 | 8 | API abuse guards (caps, rate limits, CORS) | `api-guard` units (8) + contract tests now on every staging deploy | **GOOD** | Durable 429 burst verified manually once; deliberately not per-deploy (bursting our own API each deploy is self-harm) — documented exception |
-| 9 | Native shell (launch, render, navigate, keyboard, 1 LLM turn) | Maestro 01/02/03, retry-once, big-builds-only, Maestro now pinned 2.6.1 | **COVERED, unverified** | Flow-03 trim must be confirmed on the next deliberate `e2e-ios` run (don't burn runs for it) |
+| 9 | Native shell (launch, render, navigate, keyboard, 1 LLM turn) | Maestro 01/02/03, big-builds-only, run locally since the `e2e-ios` CI workflow was deleted 2026-10-19 | **COVERED, unverified** | Flow-03 trim must be confirmed on the next local Maestro run before a store build |
 | 10 | Localization invariants | `plan-snapshot` (10) + Spanish extraction (3, live-verified) + render snapshots (4) | **GATE CLEAR** | The 4 i18n lint gates land inside L0 with the string catalogs |
 
 **Native-testing verdict (deliverable 4): keep the current scope.** Evidence: 9 `e2e-ios`

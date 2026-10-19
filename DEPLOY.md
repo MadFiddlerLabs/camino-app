@@ -72,8 +72,8 @@ every `.env` file) → clear `dist` + `node_modules/.cache` → `export --clear`
 | local dev | `expo start` | local Supabase (`npx supabase start`, `http://127.0.0.1:54321`), schema from `supabase/migrations/` |
 
 **Staging is retired (2026-10-08)** and its managed project was deleted on 2026-10-19, along with
-the managed production project. Consequences: `deploy:staging`, the API contract tests and
-`e2e-ios.yml` have no deployed backend. Production deploys are unaffected: `deploy:production`
+the managed production project. Consequences: `deploy:staging` and the API contract tests have no deployed backend, and the
+`e2e-ios.yml` workflow was deleted on 2026-10-19 (its seed step needed staging). Production deploys are unaffected: `deploy:production`
 runs only the public E2E suite against its own deploy URL. Never point local dev or the E2E seed
 at production. The seed (`scripts/e2e/seed.mjs`) refuses any host but `127.0.0.1` / `localhost`.
 

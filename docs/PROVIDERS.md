@@ -30,7 +30,7 @@ Keep this file honest: if a provider is added or dropped, update it in the same 
 | **PostHog** | Product analytics (EU cloud, cookieless on web; dashboard 808581) | 1M events/mo free — launch spikes could cross it |
 | **Sentry** | Error reporting (org `madfiddlerlabs`, project `getcamino`, EU ingest; moved from `camino-ko/camino` 2026-10-19) + 1-min uptime monitor + alert emails | **Alerts go to member emails** — route them to andrew@andrewedmond.com (the getcamino.app Workspace is being merged away) or incidents go unseen |
 | **Resend** | All app email (welcome, weekly roundup, feedback relay) **and the self-hosted box's sign-in emails (SMTP)**. Team `MadFiddlerLabs` since 2026-10-19 (moved from an old personal account), region eu-west-1. DNS at Namecheap: DKIM TXT `resend._domainkey`, CNAMEs `send` and `rsend` (→ `*.forge.rmta.net`). Receiving stays off: the apex MX belongs to Google Workspace. One sending-only key, "GetCamino prod", is used by both EAS `RESEND_API_KEY` and the box's `SMTP_PASS`: rotate both together | 3K emails/mo free tier; the weekly cron scales with users |
-| **GitHub** | Repo (org `MadFiddlerLabs` since 2026-10-19, **public** → Actions free, incl. macOS e2e-ios runners) | Org billing email anyway, in case a private repo appears |
+| **GitHub** | Repo (org `MadFiddlerLabs` since 2026-10-19, **public** → Actions free) | Org billing email anyway, in case a private repo appears |
 | **Google Cloud** | OAuth consent screen behind Google sign-in | Two emails: the **support email is public-facing** on the consent screen + a developer-contact email. Both can be andrew@getcamino.app (Workspace hosts it) |
 | **Cloudflare** | Turnstile bot check on the web interview: widget "GetCamino Interview" in the `MadFiddlerLabs` account (since 2026-10-19; the old widget in the getcamino.app account is deleted). The site's A record (172.66.x) is EAS Hosting's edge on *Expo's* account, not ours |
 
@@ -66,7 +66,7 @@ Priority order (by consequence of a missed email):
 - Env vars: `.env` + `eas env:list` across production/preview/development
   (ANTHROPIC, SUPABASE, RESEND, SENTRY, POSTHOG, CRON_SECRET; ELEVENLABS_* deleted 2026-07-12).
 - Dependencies: `@anthropic-ai/sdk`, `@supabase/supabase-js`, `@sentry/*`, `posthog-*`, `expo-*`.
-- Workflows: `.github/workflows/{ci,e2e-ios,weekly-email}.yml` (GitHub Actions; repo public).
+- Workflows: `.github/workflows/{ci,weekly-email}.yml` (GitHub Actions; repo public; `e2e-ios` deleted 2026-10-19).
 - DNS: NS → registrar-servers.com (Namecheap); MX → smtp.google.com (Google Workspace);
   A → 172.66.0.241 (Cloudflare edge, via EAS Hosting); DKIM on resend._domainkey + CNAMEs send/rsend (Resend, re-pointed 2026-10-19).
 - Cross-checked against the privacy page's processor list (`app/privacy.tsx`) — the two agree.

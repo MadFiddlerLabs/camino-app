@@ -5,8 +5,9 @@
 // Consumers:
 //  - tests-e2e/auth.setup.ts (web): exchanges hashed_token for a session via verifyOtp, then
 //    persists it as Playwright storageState.
-//  - .github/workflows/e2e-ios.yml (native): passes action_link to Maestro, which opens it —
-//    riding the app's REAL caminoapp://auth-callback deep-link session flow.
+//  - Maestro flow 04 (native, local; the e2e-ios CI workflow was deleted 2026-10-19): passes
+//    action_link to Maestro, which opens it — riding the app's REAL caminoapp://auth-callback
+//    deep-link session flow.
 //
 // Env: E2E_SUPABASE_URL + E2E_SUPABASE_SERVICE_ROLE_KEY (falls back to EXPO_PUBLIC_SUPABASE_URL /
 // SUPABASE_SERVICE_ROLE_KEY). Hard-refuses production. Start the backend first: `npx supabase start`.

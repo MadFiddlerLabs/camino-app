@@ -27,9 +27,8 @@ removed 2026-07-04 — the app is long since real; see HANDOFF.md for current st
   skip deliberately. **Web regressions are caught at the deploy, automatically, on exactly the
   bundle that shipped.**
 - **Big builds only** (a native EAS build for TestFlight/Play, i.e. an App Store candidate):
-  ALSO run the **`e2e-ios`** Maestro workflow (manual dispatch). It's ~30–45 min and iOS-sim-on-CI
-  is inherently slow, so it's a deliberate **release gate, not an iteration gate** — dispatch it
-  before cutting a store-candidate build; tolerate the occasional re-run.
+  ALSO run the Maestro flows locally (the `e2e-ios` CI workflow was deleted 2026-10-19 with
+  staging): `maestro test .maestro --exclude-tags=authed -e APP_ID=com.nerolabs.camino` against a simulator build (`eas build --platform ios --profile e2e-test --local`). It's a deliberate **release gate, not an iteration gate**.
 
 ## The pre-ship gate (all green before a big build / store submission)
 
@@ -42,11 +41,10 @@ removed 2026-07-04 — the app is long since real; see HANDOFF.md for current st
    the **authed** suite (sign in → saved roadmap → This-week → mark-done → no-op re-model →
    sign-out). Needs `E2E_SUPABASE_SERVICE_ROLE_KEY` in env (skips cleanly without it). Manual +
    pre-release (each run spends a few live LLM calls; our own rate limits apply to us too).
-5. **`e2e-ios` GitHub workflow** (manual dispatch; **big builds only**) — Maestro on an iOS
-   simulator, on a free macОS runner via `eas build --local` (zero EAS credits). Gates the
-   **3 deterministic native flows**: launch/home, sample plan, interview (a real LLM turn).
-   ~30–45 min. Dispatch before cutting a release-candidate native build; tolerate the occasional
-   re-run for CI-simulator flakiness (that's why it's a deliberate gate, not a per-push check).
+5. **Maestro, locally** (**big builds only**) — the **3 deterministic native flows**: launch/home,
+   sample plan, interview (a real LLM turn), on an iOS simulator: `maestro test .maestro --exclude-tags=authed -e APP_ID=com.nerolabs.camino` against a simulator build (`eas build --platform ios --profile e2e-test --local`).
+   The `e2e-ios` GitHub workflow that ran these on CI was deleted 2026-10-19: its seed step needed
+   the retired staging backend.
 
 ### Why the native authed flow is NOT in the gate
 
@@ -67,7 +65,7 @@ green run #7 used) so runs are reproducible; the exclusion stands.
 
 ## Release checklist (per store submission)
 
-- [ ] Gate green: typecheck · audit · test · test:e2e (12, auto on deploy) · e2e-ios (3 native).
+- [ ] Gate green: typecheck · audit · test · test:e2e (12, auto on deploy) · Maestro (3 native, local).
 - [ ] Target build device-verified by the user (TestFlight / Play internal) — mic, voice,
       dictation, deep-link sign-in, the current fix list.
 - [ ] Store metadata / screenshots / privacy answers current (docs/APP_STORE.md).
