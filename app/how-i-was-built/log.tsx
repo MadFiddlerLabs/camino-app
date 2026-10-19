@@ -869,7 +869,7 @@ const ROWS: Row[] = [
     decisions: [
       'Retire the fallback once it is no longer one: the old production copy had not taken a write since the move, so restoring it would have lost six weeks of roadmaps. The real recovery path is the self-run server\'s daily, off-site, checked backups.',
       'Development data stays on the developer\'s machine: the test-account tool now refuses any database that is not local, which is stricter than the old rule of trusting one named test project.',
-      'Write the schema down: a table that exists only in a dashboard disappears with the dashboard. The rebuilt schema is labelled a reconstruction until it is checked against an exact export from the live server.',
+      'Write the schema down: a table that exists only in a dashboard disappears with the dashboard. The schema was first rebuilt by hand, then replaced the same day with an exact export from the live server.',
     ],
   },
   {

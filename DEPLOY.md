@@ -89,8 +89,8 @@ npx supabase stop      # data persists; `npx supabase db reset` wipes and re-app
 
 `.env` holds the local `EXPO_PUBLIC_SUPABASE_URL` and anon key from `npx supabase status`.
 Email sign-in works (8-digit code, mail lands in Mailpit); Google and Apple sign-in are not
-configured locally. `supabase/migrations/20261019000000_profiles.sql` is a **reconstruction**:
-replace it with a schema-only dump of the box when one is taken.
+configured locally. `supabase/migrations/20261019000000_profiles.sql` comes from a schema-only
+dump of the production box (2026-10-19), so local and production tables match.
 
 ### Live URLs
 
