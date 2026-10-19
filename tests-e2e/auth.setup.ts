@@ -1,10 +1,10 @@
 /**
- * Auth setup for the authed web suite: seeds/resets the staging E2E user (scripts/e2e/seed.mjs),
+ * Auth setup for the authed web suite: seeds/resets the local-Supabase E2E user (scripts/e2e/seed.mjs),
  * exchanges the minted magic-link token for a session (no email involved), plants it in
  * localStorage the way supabase-js stores it, confirms the app actually recognizes the session
  * (the fixture roadmap renders), and saves Playwright storageState for the authed project.
  *
- * Skips cleanly when no service key is in the env — public smoke tests stay runnable anywhere.
+ * Skips cleanly when no service or anon key is in the env — public smoke tests stay runnable anywhere.
  */
 import { test as setup, expect } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
@@ -13,15 +13,14 @@ import { STATE_PATH } from './authState';
 
 const SERVICE_KEY = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_URL = process.env.E2E_SUPABASE_URL ?? process.env.EXPO_PUBLIC_SUPABASE_URL
-  ?? 'https://gsnsgfobfswazqhfcstx.supabase.co'; // staging project (never production)
-// The anon/publishable key is public by design (it ships in every client bundle).
-const ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
-  ?? 'sb_publishable_PjDvTesGoSp2E9FJ5bMawg_b0LlPEfF'; // staging
+  ?? 'http://127.0.0.1:54321'; // local Supabase (`npx supabase start`), never production
+// The anon/publishable key is public by design; `npx supabase status` prints the local one.
+const ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 setup('seed the E2E user and capture a signed-in session', async ({ page }) => {
-  setup.skip(!SERVICE_KEY, 'no service key in env — authed suite skipped');
+  setup.skip(!SERVICE_KEY || !ANON_KEY, 'no service/anon key in env — authed suite skipped');
 
-  // 1. Seed/reset the user + mint a token (service role, staging-guarded inside the script).
+  // 1. Seed/reset the user + mint a token (service role, local-only guard inside the script).
   const out = execFileSync('node', ['scripts/e2e/seed.mjs'], {
     env: { ...process.env, E2E_SUPABASE_URL: SUPABASE_URL, E2E_SUPABASE_SERVICE_ROLE_KEY: SERVICE_KEY },
     encoding: 'utf8',
@@ -30,7 +29,7 @@ setup('seed the E2E user and capture a signed-in session', async ({ page }) => {
   expect(seed.hashed_token).toBeTruthy();
 
   // 2. Token → session, via the normal anon client (the same exchange the magic-link email does).
-  const anon = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
+  const anon = createClient(SUPABASE_URL, ANON_KEY!, { auth: { persistSession: false } });
   const { data, error } = await anon.auth.verifyOtp({ type: 'magiclink', token_hash: seed.hashed_token });
   expect(error, `verifyOtp failed: ${error?.message}`).toBeNull();
   const session = data.session!;

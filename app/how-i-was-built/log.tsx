@@ -852,6 +852,26 @@ const ROWS: Row[] = [
       'Honest cost: a backend swap resets active sessions, so people signed in once more afterward — but no roadmap was lost, and the trade for a backend that never sleeps was worth naming rather than hiding.',
     ],
   },
+  {
+    feature: 'Hardening the self-run backend: protected server, backups off the box, test environment retired',
+    date: '8 Oct 2026',
+    work: 'The cloud account behind the server came off its free trial, which left the always-free server exposed to the provider\'s rule that reclaims idle free machines. Moving the account to pay-as-you-go removes that rule, and the server still costs nothing because it stays inside the always-free limits. A $1 monthly budget alarm emails on the first cent of spend, so a stray paid resource can\'t run up a bill quietly. The daily database backups, which had lived only on the server, are now also copied off it every day and checked on arrival: valid archive, users and roadmaps present, and an alert if the newest copy is stale. Finally, the old managed test environment, which had been down for a month, was retired rather than revived. Production deploys never depended on it, and its keep-alive job was only sending failure emails.',
+    decisions: [
+      'Pay for protection, not for compute: pay-as-you-go exists here only to switch off idle reclamation. The budget alarm makes the trade safe, because the expected bill is $0 and any spend at all is a signal.',
+      'A backup on the same disk is not a backup: the off-box copy verifies each dump\'s contents, not just that a file arrived, and alerts loudly on a failed pull or a stale copy.',
+      'Match the infrastructure to the stage: the product is in keep-the-lights-on mode, so a second always-on test environment was cost and upkeep without a user. The tests that needed it are documented as dormant, not deleted, so they come back if staging does.',
+    ],
+  },
+  {
+    feature: 'Closing out the old hosted backend, and a private backend for development',
+    date: '19 Oct 2026',
+    work: 'Six weeks after the move to a self-run server, the old managed database projects were deleted, both the production copy kept as a fallback and the retired test environment. With them went the daily job that kept the old production database awake; from the next day it would only have reported failures. Development now runs against a private copy of the backend on the developer\'s own machine, started from a versioned schema in the repository, so working on the app never needs a shared server and can never touch real data. The database schema had previously lived only inside the hosting dashboards. It is now written down in the code, and a probe confirmed that a person can save and reload a roadmap, cannot grant themselves staff access, and cannot see anyone else\'s data.',
+    decisions: [
+      'Retire the fallback once it is no longer one: the old production copy had not taken a write since the move, so restoring it would have lost six weeks of roadmaps. The real recovery path is the self-run server\'s daily, off-site, checked backups.',
+      'Development data stays on the developer\'s machine: the test-account tool now refuses any database that is not local, which is stricter than the old rule of trusting one named test project.',
+      'Write the schema down: a table that exists only in a dashboard disappears with the dashboard. The rebuilt schema is labelled a reconstruction until it is checked against an exact export from the live server.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {

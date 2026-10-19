@@ -1,4 +1,4 @@
-// E2E test-identity seeder — STAGING ONLY. Creates/resets the shared test user and mints a
+// E2E test-identity seeder — LOCAL SUPABASE ONLY. Creates/resets the shared test user and mints a
 // fresh magic sign-in link, printing JSON to stdout:
 //   { email, user_id, action_link, hashed_token }
 //
@@ -9,29 +9,31 @@
 //    riding the app's REAL caminoapp://auth-callback deep-link session flow.
 //
 // Env: E2E_SUPABASE_URL + E2E_SUPABASE_SERVICE_ROLE_KEY (falls back to EXPO_PUBLIC_SUPABASE_URL /
-// SUPABASE_SERVICE_ROLE_KEY so a pulled preview env works locally). Hard-refuses production.
+// SUPABASE_SERVICE_ROLE_KEY). Hard-refuses production. Start the backend first: `npx supabase start`.
 
 import { createClient } from '@supabase/supabase-js';
 
 const URL_ = process.env.E2E_SUPABASE_URL ?? process.env.EXPO_PUBLIC_SUPABASE_URL;
 const KEY = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 const EMAIL = process.env.E2E_EMAIL ?? 'e2e@getcamino.app';
-// Where the magic link lands after Supabase verifies it. Default: the staging web app (web
+// Where the magic link lands after Supabase verifies it. Default: the local web app (web
 // tests don't follow the link anyway); the iOS workflow overrides with caminoapp://auth-callback.
-const REDIRECT_TO = process.env.E2E_REDIRECT_TO ?? 'https://camino--staging.expo.app';
+const REDIRECT_TO = process.env.E2E_REDIRECT_TO ?? 'http://localhost:8081';
 
 if (!URL_ || !KEY) {
   console.error('seed: missing E2E_SUPABASE_URL / E2E_SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 // The one rule that must never break: E2E never touches the production database.
-// ALLOWLIST, not denylist (2026-07-05 testing audit): only the known staging project may be
-// seeded. A denylist of the prod ref would silently pass any OTHER non-staging database
-// (a future second prod project, a typo'd URL). E2E_SEED_ALLOW_HOST extends it deliberately.
-const STAGING_REF = 'gsnsgfobfswazqhfcstx';
-if (!URL_.includes(STAGING_REF) && !(process.env.E2E_SEED_ALLOW_HOST && URL_.includes(process.env.E2E_SEED_ALLOW_HOST))) {
-  console.error(`seed: REFUSING to seed a non-staging Supabase project (${URL_}).`);
-  console.error(`seed: only the staging project (${STAGING_REF}) is allowed; set E2E_SEED_ALLOW_HOST to extend.`);
+// ALLOWLIST, not denylist (2026-07-05 testing audit): only a local Supabase may be seeded. A
+// denylist of the prod host would silently pass any OTHER database (a typo'd URL, a future
+// second backend). E2E_SEED_ALLOW_HOST extends it deliberately. (The managed staging project
+// this used to allow was deleted 2026-10-19.)
+const LOCAL_HOSTS = ['127.0.0.1', 'localhost'];
+const host = new URL(URL_).hostname;
+if (!LOCAL_HOSTS.includes(host) && !(process.env.E2E_SEED_ALLOW_HOST && host === process.env.E2E_SEED_ALLOW_HOST)) {
+  console.error(`seed: REFUSING to seed a non-local Supabase (${URL_}).`);
+  console.error(`seed: only ${LOCAL_HOSTS.join(' / ')} is allowed; set E2E_SEED_ALLOW_HOST to extend.`);
   process.exit(1);
 }
 

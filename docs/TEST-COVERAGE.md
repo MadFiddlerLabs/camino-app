@@ -27,6 +27,16 @@ day: living-roadmap release — 216 passing vitest + 10 opt-in (plan-delta, comp
 draft-resume, ordering/chips, not-sure sentinel, income checks, language-classes); smoke E2E
 reworked for the auto-start interview + landing v2; Maestro 03 now LLM-free to the send.
 
+> **Staging retired 2026-10-08.** The staging-backed layers are dormant until a staging backend
+> exists again: the authed web E2E suite, the API contract tests, and the iOS E2E workflow. No
+> tests were removed. Production deploys still run the unit suite and the public web E2E suite.
+>
+> **2026-10-19:** the E2E seed (`scripts/e2e/seed.mjs`) and `tests-e2e/auth.setup.ts` now target
+> **local Supabase** (`npx supabase start`); the deleted staging project is gone from both. The seed
+> is verified against local Supabase and still refuses any non-local host. The authed Playwright
+> project has not yet been run end to end locally: `playwright.config.ts` still defaults its
+> `baseURL` to the retired staging site, so a local run needs `E2E_BASE_URL=http://localhost:8081`.
+
 Layers, and when they run:
 - **Unit / integration** (vitest, `tests/`) — deterministic, offline. Runs in `deploy.sh` and CI
   on **every push**. This is the fast safety net.
@@ -109,7 +119,8 @@ weekly via mocked-Supabase specs — the audit's gap, closed 2026-07-05; /api/tt
 ## 2. Web E2E user flows (Playwright) — 12 tests
 
 Runs against a deployed env on every deploy. **Public** = signed-out, no secrets. **Authed** =
-a seeded staging test user (magic-link token → session → storageState; the seed refuses prod).
+a seeded test user on local Supabase (magic-link token → session → storageState; the seed refuses
+any non-local host).
 
 ### Public (8)
 1. **Home renders** — hero, "Build my free roadmap" CTA, footer disclaimer; zero uncaught JS errors.

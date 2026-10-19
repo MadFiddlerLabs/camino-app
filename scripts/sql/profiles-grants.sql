@@ -1,5 +1,6 @@
 -- profiles-grants.sql — the CORRECT client grants for public.profiles, and how to verify them.
--- Run on BOTH databases (staging gsnsg…, production oftrp…) in the Supabase SQL editor.
+-- Run on the self-hosted production box (supabase.getcamino.app); local dev applies the same
+-- grants in supabase/migrations/20261019000000_profiles.sql.
 --
 -- Background (2026-07-05 incident): docs/STAFF.md step-2 hardening revoked table-level
 -- INSERT/UPDATE from `authenticated` and re-granted at the column level, but the UPDATE grant

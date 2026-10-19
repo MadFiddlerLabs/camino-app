@@ -44,13 +44,13 @@ the plan's "Ask Lola" both work (they call `/api/lola`).
 ### Use the deploy scripts (don't run export/deploy by hand)
 
 ```
-npm run deploy:staging      # -> preview env + staging DB, alias camino--staging.expo.app
+npm run deploy:staging      # RETIRED 2026-10-08 — staging DB is gone (see Environments below)
 npm run deploy:production    # -> production env + prod DB, getcamino.app
 ```
 
 ⚠️ **Why:** `EXPO_PUBLIC_*` values (Supabase URL/key, `EXPO_PUBLIC_ENV`) are inlined into the
 client bundle by Metro at `expo export` time. Two traps: (1) Metro's cache does not bust when only
-env values change, and (2) the local dev `.env` (which holds **staging**) can win over the pulled
+env values change, and (2) the local dev `.env` (which holds **local Supabase**) can win over the pulled
 target-env values. The script defends against both: `eas env:pull` the target environment →
 **`source` those vars into the shell** (Metro reads `process.env` at the highest priority, above
 every `.env` file) → clear `dist` + `node_modules/.cache` → `export --clear` → deploy → remove
@@ -60,19 +60,37 @@ every `.env` file) → clear `dist` + `node_modules/.cache` → `export --clear`
 > baked the **staging** Supabase into the production bundle (prod briefly pointed at the staging
 > DB). Fixed by sourcing the pulled env into the shell. Always verify the baked ref after deploy:
 > `curl -s https://getcamino.app/interview | grep -oE '/_expo/static/js/web/[^"]+\.js'` then grep
-> the bundle for the Supabase project ref (`oftrp…` = prod, `gsnsg…` = staging).
+> the bundle for the Supabase host (`supabase.getcamino.app` = prod; `127.0.0.1:54321` = a local
+> dev value leaked in).
 
 ### Environments / databases
 
 | Env | URL | Supabase project |
 |---|---|---|
-| production | getcamino.app / camino.expo.app | `oftrpaleqtmuvolwsocd` (real data) |
-| preview / staging | camino--staging.expo.app | `gsnsgfobfswazqhfcstx` (camino-staging, test data) |
-| local dev | `expo start` | `gsnsgfobfswazqhfcstx` (staging — never writes prod) |
+| production | getcamino.app / camino.expo.app | self-hosted `supabase.getcamino.app` since 2026-09-07 (real data). **No rollback target:** the managed projects were deleted 2026-10-19; recovery is the box's daily `pg_dumpall` backups |
+| preview / staging | camino--staging.expo.app | **retired 2026-10-08**, no backend |
+| local dev | `expo start` | local Supabase (`npx supabase start`, `http://127.0.0.1:54321`), schema from `supabase/migrations/` |
 
-Staging auth (Google sign-in) still needs configuring in the camino-staging Supabase project
-(Site URL + redirect allowlist + Google OAuth). Until then staging sign-in won't work; the
-interview runs without it.
+**Staging is retired (2026-10-08)** and its managed project was deleted on 2026-10-19, along with
+the managed production project. Consequences: `deploy:staging`, the API contract tests and
+`e2e-ios.yml` have no deployed backend. Production deploys are unaffected: `deploy:production`
+runs only the public E2E suite against its own deploy URL. Never point local dev or the E2E seed
+at production. The seed (`scripts/e2e/seed.mjs`) refuses any host but `127.0.0.1` / `localhost`.
+
+### Local dev backend (local Supabase)
+
+Needs Docker (on the Mac Mini: `colima start`). Then:
+
+```
+npx supabase start     # first run pulls images; applies supabase/migrations/
+npx supabase status    # URLs + local keys (API 54321, Studio 54323, Mailpit 54324)
+npx supabase stop      # data persists; `npx supabase db reset` wipes and re-applies migrations
+```
+
+`.env` holds the local `EXPO_PUBLIC_SUPABASE_URL` and anon key from `npx supabase status`.
+Email sign-in works (8-digit code, mail lands in Mailpit); Google and Apple sign-in are not
+configured locally. `supabase/migrations/20261019000000_profiles.sql` is a **reconstruction**:
+replace it with a schema-only dump of the box when one is taken.
 
 ### Live URLs
 

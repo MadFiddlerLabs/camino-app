@@ -1,6 +1,7 @@
 -- Durable API volume counters — the real (cross-isolate, cross-deploy) rate limiting for
--- /api/lola and /api/tts. Run on BOTH Supabase projects (staging gsnsgfobfswazqhfcstx,
--- production oftrpaleqtmuvolwsocd) via the dashboard SQL editor. Applied 2026-07-04.
+-- /api/lola and /api/tts. Applied to production 2026-07-04 and carried to the self-hosted box
+-- (supabase.getcamino.app) by the 2026-09-07 migration. Local dev gets it from
+-- supabase/migrations/20261019000001_api_counters.sql.
 --
 -- Design: one row per bucket (e.g. 'lola:d:2026-07-04' or 'lola:ip:1.2.3.4:m:2026-07-04T15:31'),
 -- bumped atomically by bump_counter(). A bucket resets when its window expires. Only the

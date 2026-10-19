@@ -1,7 +1,7 @@
 # Supabase auth email templates (Get Camino brand — five languages)
 
-The two styled auth templates, versioned here so they can be pasted into any Supabase
-project (production `oftrpaleqtmuvolwsocd`, staging `gsnsgfobfswazqhfcstx`) instead of
+The two styled auth templates, versioned here so they can be applied to any Supabase
+instance (production is self-hosted at `supabase.getcamino.app`) instead of
 living only in a dashboard. Style mirrors `lib/emailTemplates.ts` (`shell()` + `button()`:
 cal ground, Georgia masthead, Helvetica body, cobalt button, 560px column).
 
@@ -26,8 +26,9 @@ through to English. Subjects use the same inline branching (GoTrue templates sub
 
 Auth emails are transactional: no unsubscribe footer (that's only for the weekly roundup).
 
-Paste order: STAGING first → request a code from the staging app in es/it → verify → then
-PRODUCTION. Both templates below are complete paste-ready sources.
+Test order: LOCAL first (`npx supabase start`; point `[auth.email.template.magic_link]` in
+`supabase/config.toml` at the template file; mail lands in Mailpit at http://127.0.0.1:54324)
+→ request a code from the local app in es/it → verify → then PRODUCTION. Both templates below are complete paste-ready sources.
 
 ---
 
