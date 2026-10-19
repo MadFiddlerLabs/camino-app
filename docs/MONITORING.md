@@ -1,6 +1,6 @@
 # Monitoring (Sentry)
 
-Error + performance monitoring runs through **one Sentry project** — `camino` in org `camino-ko`
+Error + performance monitoring runs through **one Sentry project** — `getcamino` in org `madfiddlerlabs` (moved from `camino-ko/camino` 2026-10-19)
 (DE region) — with everything tagged by `platform` (web / ios / android / server) and
 `environment` (production / staging), so a single Issues/Performance view covers all surfaces and
 you filter by tag.
@@ -47,6 +47,7 @@ client captures. Both no-op when there's no DSN.
 ## Verifying
 
 Load a deployed URL and trigger an error; it should POST to
-`https://o4511666388598784.ingest.de.sentry.io/api/4511666670469200/envelope/` (HTTP 200) and
+`https://o4512131087269888.ingest.de.sentry.io/api/4511666670469200/envelope/` (the org's ingest host; before
+2026-10-19 it was `o4511666388598784`) (HTTP 200) and
 appear in Issues within seconds, tagged with its environment + platform. (Web verified on
 staging 2026-07-02; native verified on device from build 8.)

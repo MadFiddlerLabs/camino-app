@@ -872,6 +872,15 @@ const ROWS: Row[] = [
       'Write the schema down: a table that exists only in a dashboard disappears with the dashboard. The rebuilt schema is labelled a reconstruction until it is checked against an exact export from the live server.',
     ],
   },
+  {
+    feature: 'One home for every account: the studio organization',
+    date: '19 Oct 2026',
+    work: 'The services Camino depends on had grown up under several personal and product logins. They now live under one studio organization, MadFiddlerLabs, with Camino as a named project inside each: the code repository, the app-build service, error reporting, and the bot check on the interview form. The code was updated to match: the build configuration names the new owner and error-reporting project, the error reports go to the new address, and the bot check uses a widget in the studio account. Before changing anything, a test message was sent to both the old and the new error-reporting address to confirm that neither would drop reports during the switch.',
+    decisions: [
+      'One owner per service: a single login per service, owned by the studio, replaces logins scattered across mailboxes that are being retired.',
+      'Test before cutting over: sending a test event to both addresses proved the old one still delivered, so the switch could ship with an ordinary deploy rather than as an emergency.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {
@@ -895,7 +904,7 @@ export default function BuildLogScreen() {
           <TouchableOpacity onPress={() => router.push('/how-i-was-built')}>
             <Text style={styles.backLink}>← Read the essay</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => openExternal('https://github.com/nerolabs/camino-app')}>
+          <TouchableOpacity onPress={() => openExternal('https://github.com/MadFiddlerLabs/camino-app')}>
             <Text style={styles.backLink}>The code on GitHub ↗</Text>
           </TouchableOpacity>
         </View>

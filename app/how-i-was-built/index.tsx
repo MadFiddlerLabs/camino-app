@@ -311,8 +311,8 @@ export default function HowIWasBuilt() {
         <Link href="/how-i-was-built/roadmap" style={styles.logLink}>
           Where it’s going next: the product roadmap — updated with every release →
         </Link>
-        <Text style={styles.logLink} onPress={() => openExternal('https://github.com/nerolabs/camino-app')}>
-          And the code itself is public — github.com/nerolabs/camino-app ↗
+        <Text style={styles.logLink} onPress={() => openExternal('https://github.com/MadFiddlerLabs/camino-app')}>
+          And the code itself is public — github.com/MadFiddlerLabs/camino-app ↗
         </Text>
         <Text style={styles.footer}>
           Written while the product is young and revised as it grows — last revised 12 July 2026,

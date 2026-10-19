@@ -22,7 +22,7 @@ if (
 const config: ExpoConfig = {
   name: 'Get Camino',
   slug: 'camino',
-  owner: 'nerolabs-team',
+  owner: 'madfiddlerlabs',
   // Bumped 1.0.0 → 1.0.1 (2026-08-01): once 1.0.0 was released on the App Store, Apple CLOSES that
   // pre-release "train" (ITMS-90186), so every later TestFlight/App Store build needs a higher
   // marketing version. Build number stays remote/auto-incremented (eas.json appVersionSource).
@@ -108,8 +108,8 @@ const config: ExpoConfig = {
     // stack traces stay minified. DSN + init live in lib/monitoring.native.ts.
     ['@sentry/react-native/expo', {
       url: 'https://sentry.io/',
-      organization: 'camino-ko',
-      project: 'camino',
+      organization: 'madfiddlerlabs',
+      project: 'getcamino',
     }],
     // Peer of posthog-react-native (device-locale context for native analytics). NOT app i18n —
     // that's a separate, later effort.
