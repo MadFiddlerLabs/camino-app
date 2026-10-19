@@ -875,10 +875,11 @@ const ROWS: Row[] = [
   {
     feature: 'One home for every account: the studio organization',
     date: '19 Oct 2026',
-    work: 'The services Camino depends on had grown up under several personal and product logins. They now live under one studio organization, MadFiddlerLabs, with Camino as a named project inside each: the code repository, the app-build service, error reporting, and the bot check on the interview form. The code was updated to match: the build configuration names the new owner and error-reporting project, the error reports go to the new address, and the bot check uses a widget in the studio account. Before changing anything, a test message was sent to both the old and the new error-reporting address to confirm that neither would drop reports during the switch.',
+    work: 'The services Camino depends on had grown up under several personal and product logins. They now live under one studio organization, MadFiddlerLabs, with Camino as a named project inside each: the code repository, the app-build service, error reporting, the bot check on the interview form, and the email service. The code was updated to match: the build configuration names the new owner and error-reporting project, the error reports go to the new address, and the bot check uses a widget in the studio account. Before changing anything, a test message was sent to both the old and the new error-reporting address to confirm that neither would drop reports during the switch.',
     decisions: [
       'One owner per service: a single login per service, owned by the studio, replaces logins scattered across mailboxes that are being retired.',
       'Test before cutting over: sending a test event to both addresses proved the old one still delivered, so the switch could ship with an ordinary deploy rather than as an emergency.',
+      'Move email in one sitting: a sending domain can only live in one account, so mail was down from the moment it left the old account. The new records, the new key in both the app and the sign-in server, and a test delivery all happened in the same session, before the weekly email was next due.',
     ],
   },
 ];
