@@ -17,7 +17,7 @@ import Footer from '@/components/Footer';
 type Item = { title: string; note?: string; date?: string };
 type Section = { h: string; intro?: string; items: Item[] };
 
-const UPDATED = '19 October 2026';
+const UPDATED = '20 October 2026';
 
 const SECTIONS: Section[] = [
   {

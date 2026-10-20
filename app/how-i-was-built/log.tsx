@@ -880,6 +880,7 @@ const ROWS: Row[] = [
       'One owner per service: a single login per service, owned by the studio, replaces logins scattered across mailboxes that are being retired.',
       'Test before cutting over: sending a test event to both addresses proved the old one still delivered, so the switch could ship with an ordinary deploy rather than as an emergency.',
       'Move email in one sitting: a sending domain can only live in one account, so mail was down from the moment it left the old account. The new records, the new key in both the app and the sign-in server, and a test delivery all happened in the same session, before the weekly email was next due.',
+      'Hand over before letting go: the search-listing and sign-in accounts were added to the studio owner and confirmed working before the personal owner was removed, so neither was ever left without someone in charge. The old owner\'s verification file came off the website last, in an ordinary deploy on 20 Oct.',
     ],
   },
 ];
