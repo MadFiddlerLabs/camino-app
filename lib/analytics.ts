@@ -25,9 +25,13 @@ export function initAnalytics() {
   posthog.init(KEY, {
     api_host: HOST,
     // Cookieless (user decision 2026-07-04, consent strategy): nothing persisted client-side →
-    // no ePrivacy consent banner needed for EU visitors. Tradeoff accepted: anonymous visitors
-    // don't stitch across sessions; signed-in analytics still stitch via identify(user id).
-    persistence: 'memory',
+    // no ePrivacy consent banner needed for EU visitors. Since 2026-10-20 this is the MadFiddlerLabs
+    // standard: PostHog's server counts a visitor by a daily hash of IP + user agent and drops the
+    // IP, so one visitor = one person per day (the old persistence:'memory' made every page load a
+    // new visitor). REQUIRES "Cookieless tracking" ON in the project's Web analytics settings, or
+    // PostHog drops these events. No GeoIP or PostHog bot detection on them. Signed-in users still
+    // stitch via identify(user id) (Andrew kept this 2026-10-20).
+    cookieless_mode: 'always',
     person_profiles: 'always',   // include anonymous visitors so the home→roadmap funnel + retention work
     capture_pageview: true,      // SPA route views (home / interview / plan)
     capture_pageleave: true,

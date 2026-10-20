@@ -883,6 +883,16 @@ const ROWS: Row[] = [
       'Hand over before letting go: the search-listing and sign-in accounts were added to the studio owner and confirmed working before the personal owner was removed, so neither was ever left without someone in charge. The old owner\'s verification file came off the website last, in an ordinary deploy on 20 Oct.',
     ],
   },
+  {
+    feature: 'Counting visitors without cookies, properly',
+    date: '20 Oct 2026',
+    work: 'The website\'s analytics had been cookieless since July, but the way it was done counted every page load as a new visitor, so visitor numbers were inflated and nobody could be followed through a visit. It now uses the analytics provider\'s cookieless mode, the standard for every studio product: the provider\'s server turns the visitor\'s IP address and browser type into a one-way code that changes daily, then throws the IP address away. Still nothing is stored on the visitor\'s device and there is still no consent banner. The privacy policy now says this in plain words.',
+    decisions: [
+      'Turn the server side on first: the provider ignores cookieless events from a site whose project setting is off, so the setting went on before the code shipped.',
+      'Keep linking signed-in visits: people with an account are still recognised by their account ID, which only arrives after they sign in, because that is the only way to see whether account holders come back. Anonymous visitors are counted once per day they visit, never followed across days.',
+      'Accept the losses: these events no longer carry a rough location or the provider\'s automatic bot flag, so bot traffic has to be filtered by hand.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {

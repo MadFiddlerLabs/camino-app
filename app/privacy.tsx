@@ -9,7 +9,7 @@ import LegalPage, { type LegalContent } from '@/components/LegalPage';
 
 const EN: LegalContent = {
   title: 'Privacy',
-  updated: '13 July 2026',
+  updated: '20 October 2026',
   intro: "The short version: we collect your email and your interview answers so we can build and save your roadmap and send you the emails you asked for. We don't sell data, we don't run ads, we don't want your documents, and you can delete everything yourself, in the app, at any time.",
   sections: [
     { h: 'Who we are', body: [
@@ -22,7 +22,7 @@ const EN: LegalContent = {
       'Progress and preferences: which steps you\'ve marked done (and on which dates), and email preferences like unsubscribing from the weekly roundup.',
       'Feedback: whatever you type into "Report a problem", plus basic context (platform, app version, which screen).',
       'Free text you volunteer: anything you type into an open box — the interview\'s "anything else?" note, or a step conversation — is saved with your answers so it can shape your plan, including anything sensitive you might volunteer such as a health or criminal-record detail. We ask you not to, and Lola doesn\'t need it; if you do, it lives only with your account, is never sent to our analytics, and is deleted permanently when you delete your account.',
-      'Technical: error reports (so we can fix crashes) and product analytics — which screens are used and which interview questions people get stuck on, recorded as the question and the options chosen, never the free text you type. On the web our analytics are cookieless — nothing is stored on your device to track you across visits.',
+      'Technical: error reports (so we can fix crashes) and product analytics — which screens are used and which interview questions people get stuck on, recorded as the question and the options chosen, never the free text you type. On the web our analytics are cookieless — nothing is stored on your device to track you across visits. To count daily visitors, our analytics provider combines your IP address and browser type into a one-way code that changes every day, then discards the IP address.',
     ]},
     { h: 'What we deliberately do not collect', body: [
       'No document uploads — we\'ve chosen not to be a store of passports and certificates.',
@@ -61,7 +61,7 @@ const EN: LegalContent = {
 
 const ES: LegalContent = {
   title: 'Privacidad',
-  updated: '13 de julio de 2026',
+  updated: '20 de octubre de 2026',
   intro: 'La versión corta: recogemos tu correo y tus respuestas de la entrevista para construir y guardar tu hoja de ruta y enviarte los correos que pediste. No vendemos datos, no ponemos anuncios, no queremos tus documentos, y puedes borrarlo todo tú mismo, en la app, cuando quieras.',
   sections: [
     { h: 'Quiénes somos', body: [
@@ -74,7 +74,7 @@ const ES: LegalContent = {
       'Progreso y preferencias: qué pasos has marcado como hechos (y en qué fechas), y preferencias de correo como darte de baja del resumen semanal.',
       'Comentarios: lo que escribas en «Informar de un problema», más contexto básico (plataforma, versión de la app, pantalla).',
       'Texto libre que facilitas: lo que escribas en un campo abierto — la nota final «¿algo más?» de la entrevista o una conversación de un paso — se guarda con tus respuestas para dar forma a tu plan, incluida cualquier información sensible que facilites, como un dato de salud o de antecedentes penales. Te pedimos que no lo hagas, y Lola no lo necesita; si lo haces, solo vive con tu cuenta, nunca se envía a nuestra analítica y se elimina de forma permanente cuando borras tu cuenta.',
-      'Técnico: informes de errores (para arreglar fallos) y analítica de producto — qué pantallas se usan y en qué preguntas de la entrevista se atasca la gente, registrado como la pregunta y las opciones elegidas, nunca el texto libre que escribes. En la web nuestra analítica es sin cookies — no se guarda nada en tu dispositivo para rastrearte entre visitas.',
+      'Técnico: informes de errores (para arreglar fallos) y analítica de producto — qué pantallas se usan y en qué preguntas de la entrevista se atasca la gente, registrado como la pregunta y las opciones elegidas, nunca el texto libre que escribes. En la web nuestra analítica es sin cookies — no se guarda nada en tu dispositivo para rastrearte entre visitas. Para contar las visitas diarias, nuestro proveedor de analítica combina tu dirección IP y el tipo de navegador en un código irreversible que cambia cada día, y después descarta la dirección IP.',
     ]},
     { h: 'Lo que deliberadamente no recogemos', body: [
       'Sin subida de documentos — hemos decidido no ser un almacén de pasaportes y certificados.',
