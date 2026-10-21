@@ -8,12 +8,26 @@
 # export, then deploy. Skipping the cache clear silently ships the wrong database.
 #
 # Usage:
-#   EXPO_TOKEN=... ./scripts/deploy.sh staging      # -> preview env, alias camino--staging
-#   EXPO_TOKEN=... ./scripts/deploy.sh production    # -> production env, getcamino.app
+#   ./scripts/deploy.sh staging                 # -> preview env, alias camino--staging (retired)
+#   ./scripts/deploy.sh production              # -> production env on EAS Hosting
+#   ./scripts/deploy.sh production cloudflare   # -> production env on Cloudflare Workers
+#
+# Hosting: EAS Hosting until getcamino.app's DNS moves to Cloudflare (Expo Starter ends
+# 2026-11-01, and the free plan has no custom domains). The cloudflare host builds the same
+# export, splits it with scripts/build-cloudflare.mjs, and uploads the server secrets from the
+# pulled EAS environment with the Worker version (scripts/cloudflare-secrets.mjs; names only).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 TARGET="${1:-}"
+HOST="${2:-eas}"
+case "$HOST" in
+  eas|cloudflare) ;;
+  *) echo "usage: $0 {staging|production} [eas|cloudflare]"; exit 1 ;;
+esac
+if [ "$HOST" = cloudflare ] && [ "$TARGET" != production ]; then
+  echo "[deploy] Cloudflare hosts production only (staging is retired)."; exit 1
+fi
 case "$TARGET" in
   staging)    EAS_ENV=preview;    DEPLOY_FLAGS=(--environment preview --alias staging) ;;
   production) EAS_ENV=production; DEPLOY_FLAGS=(--prod --environment production) ;;
@@ -60,12 +74,23 @@ if find dist -maxdepth 1 -name "* [0-9]" | grep -q .; then
   find dist -maxdepth 1 -name "* [0-9]" -print -exec rm -rf {} +
 fi
 
-echo "[deploy] Deploying to ${TARGET} ..."
+echo "[deploy] Deploying to ${TARGET} on ${HOST} ..."
 DEPLOY_LOG="$(mktemp)"
-npx eas-cli deploy "${DEPLOY_FLAGS[@]}" 2>&1 | tee "$DEPLOY_LOG"
-# The UNIQUE per-deploy URL (camino--<id>.expo.app) is always fresh — testing it avoids the
-# alias/custom-domain CDN lag, so E2E checks exactly the bundle we just shipped.
-DEPLOY_URL="$(grep -oE 'https://camino--[a-z0-9]+\.expo\.app' "$DEPLOY_LOG" | head -1)"
+if [ "$HOST" = cloudflare ]; then
+  node scripts/build-cloudflare.mjs
+  SECRETS_FILE="$(mktemp)"
+  trap 'rm -f "$SECRETS_FILE" .env.local' EXIT
+  node scripts/cloudflare-secrets.mjs .env.local "$SECRETS_FILE"
+  npx wrangler deploy --secrets-file "$SECRETS_FILE" 2>&1 | tee "$DEPLOY_LOG"
+  rm -f "$SECRETS_FILE"
+  # The workers.dev URL serves the version just deployed (no custom-domain cache in front).
+  DEPLOY_URL="$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$DEPLOY_LOG" | head -1)"
+else
+  npx eas-cli deploy "${DEPLOY_FLAGS[@]}" 2>&1 | tee "$DEPLOY_LOG"
+  # The UNIQUE per-deploy URL (camino--<id>.expo.app) is always fresh — testing it avoids the
+  # alias/custom-domain CDN lag, so E2E checks exactly the bundle we just shipped.
+  DEPLOY_URL="$(grep -oE 'https://camino--[a-z0-9]+\.expo\.app' "$DEPLOY_LOG" | head -1)"
+fi
 rm -f "$DEPLOY_LOG"
 
 # Web E2E as a post-deploy regression gate (set DEPLOY_SKIP_E2E=1 to skip). Runs against the
@@ -78,7 +103,7 @@ if [ -n "${DEPLOY_SKIP_E2E:-}" ]; then
   echo "[deploy] ⚠️  Web E2E SKIPPED by DEPLOY_SKIP_E2E=1."
 elif [ -z "$DEPLOY_URL" ]; then
   # A gate that silently doesn't run isn't a gate (2026-07-05 testing audit).
-  echo "[deploy] ❌ No unique deploy URL captured from eas-cli output — the E2E gate cannot run."
+  echo "[deploy] ❌ No deploy URL captured from the ${HOST} deploy output — the E2E gate cannot run."
   echo "[deploy]    The deploy itself may have succeeded; verify, fix the URL capture, or rerun"
   echo "[deploy]    with DEPLOY_SKIP_E2E=1 to accept an ungated deploy deliberately."
   exit 1

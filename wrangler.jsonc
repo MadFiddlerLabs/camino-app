@@ -1,0 +1,28 @@
+// Cloudflare Workers config for the web app (getcamino.app). Build first:
+//   npx expo export --platform web && node scripts/build-cloudflare.mjs
+// Deploys go through scripts/deploy.sh, which also uploads the server secrets from the EAS
+// production environment (EAS stays the one place secrets are stored).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "getcamino",
+  "account_id": "9172138826e5dfcc3cd6bf986bab5324", // MadFiddlerLabs
+  "main": "dist/cloudflare/worker/index.mjs",
+  "compatibility_date": "2026-10-01",
+  // nodejs_compat also fills process.env from vars and secrets, which the API routes read.
+  "compatibility_flags": ["nodejs_compat"],
+  "find_additional_modules": true,
+  "rules": [
+    { "type": "CommonJS", "globs": ["server/**/*.js"], "fallthrough": false },
+    { "type": "Text", "globs": ["server/**/*.html", "server/**/*.json"], "fallthrough": false }
+  ],
+  "assets": {
+    "directory": "dist/cloudflare/assets",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "none"
+  },
+  // The workers.dev address is ours too: let it call the paid API routes (lib/apiGuard.ts).
+  "vars": { "ALLOWED_ORIGINS": "https://getcamino.camino-app.workers.dev" },
+  "observability": { "enabled": true },
+  "workers_dev": true,
+  "preview_urls": false
+}

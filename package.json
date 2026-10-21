@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "deploy:staging": "bash scripts/deploy.sh staging",
     "deploy:production": "bash scripts/deploy.sh production",
+    "deploy:cloudflare": "bash scripts/deploy.sh production cloudflare",
     "ota:production": "npm run --silent audit && npm run --silent test && EXPO_PUBLIC_API_URL=https://getcamino.app npx eas-cli update --channel production --environment production --auto",
     "audit": "npx tsx scripts/audit-catalog.ts",
     "audit:matrix": "npx tsx scripts/audit-matrix.ts",
@@ -71,7 +72,8 @@
     "sharp": "^0.35.3",
     "supabase": "^2.121.0",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "wrangler": "^4.151.3"
   },
   "private": true
 }

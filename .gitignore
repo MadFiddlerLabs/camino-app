@@ -74,3 +74,6 @@ docs/STAFF.md
 docs/testing/
 docs/archive/
 docs/audits/
+
+# Wrangler local dev state (Cloudflare Workers)
+.wrangler/
