@@ -893,6 +893,17 @@ const ROWS: Row[] = [
       'Accept the losses: these events no longer carry a rough location or the provider\'s automatic bot flag, so bot traffic has to be filtered by hand.',
     ],
   },
+  {
+    feature: 'A new home for the website',
+    date: '21 Oct 2026',
+    work: 'The website and the small server behind it moved from the app-build service\'s hosting to Cloudflare\'s, under the same studio account that already ran the bot check. The app-build plan that included custom web addresses was cancelled to cut costs, and the free tier cannot serve getcamino.app. The pages are now plain files served from Cloudflare\'s network, and only the parts that need code (the interview, sign-in helpers, email links, the status check) run as a small program. The domain\'s address book moved to Cloudflare too, record for record, so email and sign-in never noticed. The iPhone and Android apps needed no update: they talk to getcamino.app, wherever it lives.',
+    decisions: [
+      'Same engine, new building: the old host already ran on Cloudflare\'s technology, so the server code moved unchanged and the risk stayed low.',
+      'Prove it before pointing at it: the new host ran on a test address first, with the full test suite, every page in the sitemap, a real interview turn and a contact-form email, before the domain moved.',
+      'One place for secrets: the keys stay in the app-build service, and every deploy copies them to the new host, so changing a key never means remembering a second place.',
+      'Copy the address book exactly: every DNS record was checked to answer identically from the new provider before the switch, so mail and sign-in kept working through it.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {

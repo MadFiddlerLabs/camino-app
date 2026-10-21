@@ -1,7 +1,7 @@
 # Camino — deployment runbook
 
-Target: a **dev / staging / production** pipeline on **EAS**, web first (EAS Hosting) so
-family can test, then iOS/Android via EAS Build. The Anthropic key is server-side only
+Target: a **dev / staging / production** pipeline. The web app and its API routes run on
+**Cloudflare Workers** (EAS Hosting until 2026-10-21); iOS/Android build and update via **EAS**. The Anthropic key is server-side only
 (`app/api/lola+api.ts`), never shipped to the client.
 
 ## Prerequisites (one-time)
@@ -27,25 +27,32 @@ eas env:create --name ANTHROPIC_API_KEY --value <key> --environment preview   --
 # (repeat the two EXPO_PUBLIC_SUPABASE_* as plain env vars per environment)
 ```
 
-## Phase 1 — Web (family testing)
+## Phase 1 — Web
 
-`app.config.ts` sets `web.output: 'server'`, which enables the API route on EAS Hosting.
+`app.config.ts` sets `web.output: 'server'`, so `expo export --platform web` produces static pages
+(`dist/client`, pre-rendered HTML in `dist/server`) plus the API routes (`dist/server/_expo/functions`).
 
-```
-# Staging (default alias) — share this URL with family:
-eas deploy --environment preview
+**Host: Cloudflare Workers since 2026-10-21** (Worker `getcamino`, MadFiddlerLabs account, custom
+domain getcamino.app, test URL https://getcamino.camino-app.workers.dev). Expo's Starter plan ends
+2026-11-01 and the free plan has no custom domains. How it fits together:
+- `scripts/build-cloudflare.mjs` splits the export: every pre-rendered page and static file becomes a
+  Workers static asset (served without running code); the worker (`cloudflare/worker.mjs`, Expo's
+  `expo-server/adapter/workerd`) gets only the routes manifest, the API functions, the dynamic-route
+  templates and the 404 page. Keeps the worker small enough for the free plan.
+- `scripts/cloudflare-secrets.mjs` turns the pulled EAS environment into the Worker's secrets, so
+  **EAS stays the one place secrets are stored**: rotate in EAS, then deploy.
+- `wrangler.jsonc` holds the rest (account, `nodejs_compat`, assets, the custom domain).
+- Wrangler uses Andrew's OAuth login (`npx wrangler whoami`).
 
-# Production alias:
-eas deploy --prod --environment production
-```
-`eas deploy` builds the web bundle + API routes and returns a URL. Verify the interview and
-the plan's "Ask Lola" both work (they call `/api/lola`).
+Free-plan limits: 10 ms CPU per request and 100K worker requests a day (static assets don't count).
+Measured 2026-10-21: every route ≤ 4 ms CPU (waiting on Anthropic/Supabase doesn't count).
 
 ### Use the deploy scripts (don't run export/deploy by hand)
 
 ```
 npm run deploy:staging      # RETIRED 2026-10-08 — staging DB is gone (see Environments below)
-npm run deploy:production    # -> production env + prod DB, getcamino.app
+npm run deploy:production    # -> production env + prod DB, Cloudflare Worker -> getcamino.app
+npm run deploy:eas           # -> the same build on EAS Hosting (camino.expo.app only; fallback)
 ```
 
 ⚠️ **Why:** `EXPO_PUBLIC_*` values (Supabase URL/key, `EXPO_PUBLIC_ENV`) are inlined into the
@@ -67,7 +74,7 @@ every `.env` file) → clear `dist` + `node_modules/.cache` → `export --clear`
 
 | Env | URL | Supabase project |
 |---|---|---|
-| production | getcamino.app / camino.expo.app | self-hosted `supabase.getcamino.app` since 2026-09-07 (real data). **No rollback target:** the managed projects were deleted 2026-10-19; recovery is the box's daily `pg_dumpall` backups |
+| production | getcamino.app (Cloudflare Worker) | self-hosted `supabase.getcamino.app` since 2026-09-07 (real data). **No rollback target:** the managed projects were deleted 2026-10-19; recovery is the box's daily `pg_dumpall` backups |
 | preview / staging | camino--staging.expo.app | **retired 2026-10-08**, no backend |
 | local dev | `expo start` | local Supabase (`npx supabase start`, `http://127.0.0.1:54321`), schema from `supabase/migrations/` |
 
@@ -94,11 +101,10 @@ dump of the production box (2026-10-19), so local and production tables match.
 
 ### Live URLs
 
-- **Production:** https://getcamino.app (custom domain) and https://camino.expo.app
-- Custom domains require a **paid EAS plan** (the Free tier can't attach one). Configured in the
-  Expo dashboard → Hosting → Settings → Custom domain; it prints the DNS records (A / TXT / CNAME)
-  to add at the registrar. Point the apex `@` A record at the given IP and delete any registrar
-  default URL-redirect on `@` (it conflicts).
+- **Production:** https://getcamino.app (Cloudflare Worker custom domain). www.getcamino.app
+  redirects to it (Cloudflare Redirect Rule). DNS is a Cloudflare zone in the MadFiddlerLabs account
+  since 2026-10-21; Namecheap stays the registrar.
+- camino.expo.app still exists on Expo's free plan but is no longer deployed to.
 
 ## Phase 2 — Mobile (iOS / Android)
 

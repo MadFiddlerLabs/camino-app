@@ -9,11 +9,11 @@
 #
 # Usage:
 #   ./scripts/deploy.sh staging                 # -> preview env, alias camino--staging (retired)
-#   ./scripts/deploy.sh production              # -> production env on EAS Hosting
-#   ./scripts/deploy.sh production cloudflare   # -> production env on Cloudflare Workers
+#   ./scripts/deploy.sh production cloudflare   # -> production on Cloudflare Workers (getcamino.app)
+#   ./scripts/deploy.sh production [eas]         # -> production env on EAS Hosting (camino.expo.app)
 #
-# Hosting: EAS Hosting until getcamino.app's DNS moves to Cloudflare (Expo Starter ends
-# 2026-11-01, and the free plan has no custom domains). The cloudflare host builds the same
+# Hosting: getcamino.app is a Cloudflare Workers custom domain since 2026-10-21 (Expo Starter
+# ends 2026-11-01; the free plan has no custom domains). The cloudflare host builds the same
 # export, splits it with scripts/build-cloudflare.mjs, and uploads the server secrets from the
 # pulled EAS environment with the Worker version (scripts/cloudflare-secrets.mjs; names only).
 set -euo pipefail

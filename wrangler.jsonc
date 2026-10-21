@@ -20,6 +20,10 @@
     "html_handling": "drop-trailing-slash",
     "not_found_handling": "none"
   },
+  // getcamino.app is a Workers custom domain (zone in the same Cloudflare account since
+  // 2026-10-21). www.getcamino.app is a proxied DNS record plus a zone Redirect Rule to the apex,
+  // because static assets are served before the worker runs and so can't redirect by host.
+  "routes": [{ "pattern": "getcamino.app", "custom_domain": true }],
   // The workers.dev address is ours too: let it call the paid API routes (lib/apiGuard.ts).
   "vars": { "ALLOWED_ORIGINS": "https://getcamino.camino-app.workers.dev" },
   "observability": { "enabled": true },

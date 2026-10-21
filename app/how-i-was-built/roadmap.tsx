@@ -17,12 +17,13 @@ import Footer from '@/components/Footer';
 type Item = { title: string; note?: string; date?: string };
 type Section = { h: string; intro?: string; items: Item[] };
 
-const UPDATED = '20 October 2026';
+const UPDATED = '21 October 2026';
 
 const SECTIONS: Section[] = [
   {
     h: 'Just shipped',
     items: [
+      { title: 'The website moved to a new host', date: '21 Oct 2026', note: 'getcamino.app now runs on Cloudflare instead of the app-build service\'s hosting, which stopped including custom web addresses on its free plan. Pages are served as plain files from a global network, and only the parts that need code run as a small program. It was tested in full on a separate address before the switch, and the domain\'s records were copied one for one, so email and sign-in carried on as normal. Nothing changes for you, and the phone apps needed no update.' },
       { title: 'Website analytics: still cookieless, now counted properly', date: '20 Oct 2026', note: 'The website has never stored anything on your device to track you, and it still doesn\'t. What changed is how visits are counted. Before, every page load looked like a brand-new visitor, which inflated the numbers. Now our analytics provider combines your IP address and browser type into a one-way code that changes every day, then discards the IP address, so a visit counts once per day. The privacy policy explains this in plain words. There is still no cookie banner, because there are still no cookies.' },
       { title: 'Old hosted backend retired', date: '19 Oct 2026', note: 'The managed database projects that Camino used before moving to its own server have been deleted. Your roadmap was not on them: it has lived on the self-run server since September, which keeps daily backups off-site. Behind the scenes, development now runs against a private local copy of the backend, so building new features never touches real data. Nothing changes for you.' },
       { title: 'Backend hardening: protected server and off-site backups', date: '8 Oct 2026', note: 'Two safeguards for the server that stores your roadmap. First, the cloud account it runs on moved off its free trial onto pay-as-you-go, which stops the provider from ever reclaiming the server for being quiet. It still costs nothing, and a budget alarm fires on the first cent of spend. Second, the daily database backups no longer live only on the server itself: a copy leaves the server every day and is checked on arrival, so a lost disk can no longer take the backups with it. Nothing changes for you; this is the plumbing getting sturdier.' },
