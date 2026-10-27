@@ -22,6 +22,11 @@ const KEY_ID_STORAGE = 'camino.appattest.keyId';
 // Google Cloud project number tied to the Play app; required to prepare the Play Integrity provider.
 // Empty until the Play/Cloud project exists → the Android path stays inert (returns null).
 const CLOUD_PROJECT_NUMBER = process.env.EXPO_PUBLIC_GOOGLE_CLOUD_PROJECT_NUMBER ?? '';
+// Cap on the whole attestation exchange. The native integrity calls have no timeout of their own,
+// and lola.ts awaits the session before its 35s fetch timer starts — so one stalled call (a Redmi,
+// 2026-10-26) spun the interview forever. On timeout we return null: the server answers 401 and
+// Lola shows its normal error, which the user can retry.
+export const ATTEST_TIMEOUT_MS = 15_000;
 
 let cached: { session: string; exp: number } | null = null;
 let inFlight: Promise<string | null> | null = null;
@@ -77,8 +82,10 @@ async function attestAndroid(): Promise<string | null> {
   if (!CLOUD_PROJECT_NUMBER) return null; // inert until the Play/Cloud project exists
 
   // 1. Warm the integrity token provider once (idempotent per app run).
+  // A failed warm-up is forgotten so the next attempt retries it instead of rethrowing forever.
   if (!integrityProviderReady) {
-    integrityProviderReady = AppIntegrity.prepareIntegrityTokenProviderAsync(CLOUD_PROJECT_NUMBER);
+    integrityProviderReady = AppIntegrity.prepareIntegrityTokenProviderAsync(CLOUD_PROJECT_NUMBER)
+      .catch((err) => { integrityProviderReady = null; throw err; });
   }
   await integrityProviderReady;
 
@@ -106,10 +113,17 @@ async function attest(): Promise<string | null> {
   }
 }
 
+function withTimeout(p: Promise<string | null>, ms: number): Promise<string | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), ms); });
+  return Promise.race([p, timeout]).finally(() => clearTimeout(timer));
+}
+
 export async function getNativeSession(): Promise<string | null> {
   const now = Date.now();
   if (cached && cached.exp - 60_000 > now) return cached.session;
   if (inFlight) return inFlight;
-  inFlight = attest().finally(() => { inFlight = null; });
+  // A late-finishing attempt still caches its session, so the next call can use it.
+  inFlight = withTimeout(attest(), ATTEST_TIMEOUT_MS).finally(() => { inFlight = null; });
   return inFlight;
 }

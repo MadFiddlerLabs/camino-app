@@ -17,7 +17,7 @@ import Footer from '@/components/Footer';
 type Item = { title: string; note?: string; date?: string };
 type Section = { h: string; intro?: string; items: Item[] };
 
-const UPDATED = '21 October 2026';
+const UPDATED = '27 October 2026';
 
 const SECTIONS: Section[] = [
   {
@@ -79,6 +79,7 @@ const SECTIONS: Section[] = [
   {
     h: 'In progress',
     items: [
+      { title: 'No more endless spinner on Android', note: 'On one Android phone, Lola\'s first reply sometimes spun forever. Before Lola answers, the app asks Google Play to confirm it is a genuine install, and that check has no time limit of its own: if Google\'s side stalled, the app waited for good. The check now gives up after 15 seconds and Lola shows her normal "try again" message, and a failed check is retried properly on the next attempt. A regression test covers it. It reaches phones with the next over-the-air update.' },
       { title: 'The EU storefronts (Spain included)', note: 'The iOS app is live worldwide except the EU\'s App Store storefronts, which Apple withholds until a pending business-identity verification completes and the trader declaration is filed. The web app serves Spain and the EU fully in the meantime; the moment the case closes, the storefronts unlock.' },
       { title: 'The languages get their human pass', note: 'Machine-drafted, mechanically linted — and now verified by native speakers, sentence by sentence, before launch. Corrections land as reviewable diffs against frozen snapshots.' },
       { title: 'Real users become the testers', note: 'Family testing ran its course — the last full evening of expert testing found nothing. From here, real users, crash monitoring, and over-the-air fixes are the quality loop; every bug that reaches a person still earns a permanent regression test.' },
