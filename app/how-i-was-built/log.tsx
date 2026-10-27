@@ -904,6 +904,17 @@ const ROWS: Row[] = [
       'Copy the address book exactly: every DNS record was checked to answer identically from the new provider before the switch, so mail and sign-in kept working through it.',
     ],
   },
+  {
+    feature: 'Version 1.0.1 in both app stores',
+    date: '27 Oct 2026',
+    work: 'The first store update since launch went to Google Play and the App Store together. It brings the Costs and Timing tabs to the phones, and a fix for an Android phone where Lola\'s first reply could spin forever. Before Lola answers, the app proves it is a genuine install, and that check had no time limit: one stalled call left the spinner up with no request ever sent. The check now gives up after 15 seconds and Lola shows her normal retry message. While the update waited for review, an Apple test iPhone ran it and its genuine-install check never answered, so Lola showed that retry message. The same build on a real iPhone worked, Apple approved it, and the time limit is what turned an endless spinner into a clear error.',
+    decisions: [
+      'Cap the whole check, not each step: one 15-second limit covers the full exchange, so no single slow call can hold the interview hostage.',
+      'Fail into the normal error, never a bypass: a timed-out check sends Lola no proof, the server refuses, and the user gets the same retry message as any other hiccup.',
+      'Check the alarm before acting on it: the error report named the new iPhone build, so we traced it to Apple\'s test device and reproduced the flow on a real phone before deciding not to pull the release.',
+      'One release for both stores: the Android build that had already passed the internal test went to production unchanged, and the iPhone build carried the same code.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {
