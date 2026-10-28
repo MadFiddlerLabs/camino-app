@@ -9,6 +9,7 @@ import { currentLang } from '@/lib/i18n';
 import { capture, identify, resetAnalytics } from '@/lib/analytics';
 import { captureError } from '@/lib/monitoring';
 import { signInWithApple as appleFlow, appleSignInAvailable } from '@/lib/appleSignIn';
+import { isAppleSignInCancel } from '@/lib/appleSignInCancel';
 import { type Profile } from './interview-controller';
 
 // Lets the auth browser session close cleanly after the OAuth redirect (no-op harm on native).
@@ -116,9 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await appleFlow(); // session lands via onAuthStateChange
     } catch (e: unknown) {
-      // The user closing Apple's sheet throws ERR_REQUEST_CANCELED — that's not an error.
+      // The user closing Apple's sheet is not an error (see lib/appleSignInCancel.ts).
+      if (isAppleSignInCancel(e)) return;
       const code = (e as { code?: string })?.code;
-      if (code === 'ERR_REQUEST_CANCELED') return;
       // Anything else is a real failure ("Sign Up Not Completed" etc.) — make it observable.
       // Apple's native errors carry a code (e.g. ERR_REQUEST_UNKNOWN / 1000) that names the layer
       // that failed; Supabase signInWithIdToken errors carry a message. Log both destinations.
