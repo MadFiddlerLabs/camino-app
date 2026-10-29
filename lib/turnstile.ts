@@ -51,6 +51,9 @@ let cached: { session: string; exp: number } | null = null;
 let inFlight: { promise: Promise<string | null>; interactive: boolean } | null = null;
 let scriptPromise: Promise<void> | null = null;
 let invisibleFailedAt = 0;
+// True when the latest acquire ended because the user pressed Cancel on the visible challenge.
+// lola.ts reads it to tell a choice from a failure (GETCAMINO-V, 2026-10-29).
+let dismissed = false;
 
 function loadScript(): Promise<void> {
   if (getTurnstile()) return Promise.resolve();
@@ -151,6 +154,7 @@ function solveVisible(siteKey: string): Promise<string> {
 }
 
 async function acquire(interactive: boolean): Promise<string | null> {
+  dismissed = false;
   try {
     await loadScript();
     let tsToken: string | null = null;
@@ -167,9 +171,8 @@ async function acquire(interactive: boolean): Promise<string | null> {
         tsToken = await solveVisible(SITE_KEY as string);
         capture('turnstile_visible_challenge', { outcome: 'solved' });
       } catch (e) {
-        capture('turnstile_visible_challenge', {
-          outcome: e instanceof Error && e.message === 'dismissed' ? 'dismissed' : 'failed',
-        });
+        dismissed = e instanceof Error && e.message === 'dismissed';
+        capture('turnstile_visible_challenge', { outcome: dismissed ? 'dismissed' : 'failed' });
         return null;
       }
     }
@@ -187,6 +190,11 @@ async function acquire(interactive: boolean): Promise<string | null> {
   } catch {
     return null; // fail soft — the server decides whether to require a session
   }
+}
+
+/** True when the latest attempt to get a session ended with the user canceling the visible challenge. */
+export function challengeDismissed(): boolean {
+  return dismissed;
 }
 
 /**

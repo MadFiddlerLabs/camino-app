@@ -24,7 +24,7 @@ import { useAuth } from '@/core/AuthContext';
 import { saveProfile as saveProfileDb } from '@/core/profileDb';
 import { saveDraft, loadDraft, clearDraft } from '@/lib/interviewDraft';
 import { TEST_PERSONAS, type Persona } from '@/core/test-personas';
-import { askAnthropic } from '@/lib/lola';
+import { askAnthropic, ChallengeDismissedError } from '@/lib/lola';
 import { getSessionToken } from '@/lib/turnstile';
 import { splitLolaBubble } from '@/lib/lolaBubble';
 import { parseExtraction, type Extraction } from '@/lib/extractionPrompt';
@@ -542,9 +542,12 @@ export default function InterviewScreen() {
         ? SLOTS.filter(s => !(s.field in profile) && s.field !== currentSlot.field) : [];
       await advance(currentSlot, value, ackP, mode, extras, remainingSlots);
     } catch (e) {
-      captureError(e instanceof Error ? e : new Error('interview chip turn failed'), {
-        route: '/interview', field: currentSlot.field,
-      });
+      // A canceled security check is the user's choice: show the retry message, don't page Sentry.
+      if (!(e instanceof ChallengeDismissedError)) {
+        captureError(e instanceof Error ? e : new Error('interview chip turn failed'), {
+          route: '/interview', field: currentSlot.field,
+        });
+      }
       capture('interview_turn_failed', { field: currentSlot.field });
       setTurns(prev => [...prev, { role: 'lola', text: t('fallback.turnFailed') }]);
     } finally {
@@ -676,9 +679,11 @@ export default function InterviewScreen() {
     } catch (e) {
       // Extraction failed or timed out: own it, restore their answer so nothing is retyped,
       // and let them send again. The spinner must never be a destination (build-28 finding).
-      captureError(e instanceof Error ? e : new Error('interview turn failed'), {
-        route: '/interview', field: currentSlot.field,
-      });
+      if (!(e instanceof ChallengeDismissedError)) {
+        captureError(e instanceof Error ? e : new Error('interview turn failed'), {
+          route: '/interview', field: currentSlot.field,
+        });
+      }
       capture('interview_turn_failed', { field: currentSlot.field });
       setTurns(prev => [...prev, { role: 'lola', text: t('fallback.turnFailed') }]);
       setInput(text);

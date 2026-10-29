@@ -915,6 +915,17 @@ const ROWS: Row[] = [
       'One release for both stores: the Android build that had already passed the internal test went to production unchanged, and the iPhone build carried the same code.',
     ],
   },
+  {
+    feature: 'A canceled step is a choice, not a crash',
+    date: '29 Oct 2026',
+    work: 'Two error alerts in two days turned out to be people changing their minds. On the iPhone, closing Apple\'s sign-in sheet showed a "sign-in failed" message and raised an alarm, because the cancel arrived without the label the app was checking for. On the web, a visitor tapped Cancel on the security check that Lola needs before she answers, and the refused request raised another alarm. Both now end quietly: a closed Apple sheet does nothing, and a canceled security check shows Lola\'s normal retry message without sending a request that is bound to fail.',
+    decisions: [
+      'Count choices separately from failures: alarms are for things that broke. A person backing out of a step is normal, and paging on it would train us to ignore the alarm.',
+      'Match the cancel two ways: the Apple cancel is recognized by its documented code or by the library\'s fixed message, so a missing label can\'t turn it back into an error.',
+      'Keep every real failure loud: only an explicit Cancel is silenced. A security check that errors or never loads still reaches the server, and its refusal still raises an alarm.',
+      'Still count the cancels: analytics records each canceled security check, so we would see if the check started driving people away.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {

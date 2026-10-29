@@ -110,6 +110,32 @@ describe('turnstile session: invisible-first with visible fallback (CAMINO-8/D)'
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('remembers a dismiss until the next attempt, so lola.ts can tell a choice from a failure (GETCAMINO-V)', async () => {
+    const { getSessionToken, challengeDismissed } = await importFresh();
+    expect(challengeDismissed()).toBe(false);
+    const p = getSessionToken({ interactive: true });
+    await vi.advanceTimersByTimeAsync(8_000);
+    document.querySelector<HTMLButtonElement>('[data-testid="turnstile-cancel"]')!.click();
+    await expect(p).resolves.toBeNull();
+    expect(challengeDismissed()).toBe(true);
+
+    // The next turn shows the challenge again; solving it clears the flag.
+    const again = getSessionToken({ interactive: true });
+    await vi.advanceTimersByTimeAsync(0);
+    renders[renders.length - 1].opts.callback('user-solved-token');
+    await expect(again).resolves.toBe(SESSION);
+    expect(challengeDismissed()).toBe(false);
+  });
+
+  it('a challenge that errors is a failure, not a dismiss', async () => {
+    const { getSessionToken, challengeDismissed } = await importFresh();
+    const p = getSessionToken({ interactive: true });
+    await vi.advanceTimersByTimeAsync(8_000);
+    renders[renders.length - 1].opts['error-callback']!();
+    await expect(p).resolves.toBeNull();
+    expect(challengeDismissed()).toBe(false);
+  });
+
   it('an interactive call arriving while a background solve is pending escalates instead of inheriting its null', async () => {
     const { getSessionToken } = await importFresh();
     const warm = getSessionToken();                        // preload, in flight...

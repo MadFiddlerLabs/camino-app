@@ -7,7 +7,7 @@
  */
 
 import { type LolaMode, type LolaParams } from '@/lib/lolaPrompts';
-import { getSessionToken } from '@/lib/turnstile';
+import { challengeDismissed, getSessionToken } from '@/lib/turnstile';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? '';
 
@@ -16,6 +16,16 @@ const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? '';
 const TIMEOUT_MS = 35_000;
 
 export type LolaMessage = { role: 'user' | 'assistant'; content: string };
+
+// The user pressed Cancel on the visible security check, so there is no session and the server
+// would answer 401. That is a choice, not a failure: callers show their normal retry message but
+// don't report it to Sentry (GETCAMINO-V, 2026-10-29: a translated Android Chrome page).
+export class ChallengeDismissedError extends Error {
+  constructor() {
+    super('security check dismissed');
+    this.name = 'ChallengeDismissedError';
+  }
+}
 
 // C2a: the client sends a mode + typed params, never a raw `system`/`model`. The server
 // (app/api/lola+api.ts → lib/lolaPrompts.ts) owns the prompt, model, and token cap.
@@ -29,6 +39,7 @@ export async function askAnthropic<M extends LolaMode>(opts: {
   // Acquired BEFORE the abort timer starts: interactive means the visible challenge fallback can
   // appear here, and however long the user takes to solve it must not count against the fetch.
   const session = await getSessionToken({ interactive: true });
+  if (!session && challengeDismissed()) throw new ChallengeDismissedError();
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
