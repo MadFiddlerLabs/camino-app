@@ -17,12 +17,13 @@ import Footer from '@/components/Footer';
 type Item = { title: string; note?: string; date?: string };
 type Section = { h: string; intro?: string; items: Item[] };
 
-const UPDATED = '28 October 2026';
+const UPDATED = '4 November 2026';
 
 const SECTIONS: Section[] = [
   {
     h: 'Just shipped',
     items: [
+      { title: 'A sturdier iPhone check before Lola answers', date: '4 Nov 2026', note: 'Before Lola answers, the iPhone app proves it is a genuine install using a key in the phone\'s secure hardware. The app now makes a new key for every check, as Apple\'s rules require, instead of reusing one. This reaches iPhones as an automatic update, with no App Store download.' },
       { title: 'Version 1.0.1 on both app stores: Costs and Timing on your phone', date: '27 Oct 2026', note: 'The iPhone and Android apps now have the Costs and Timing tabs that started on the web. Costs shows what your move is likely to cost, as a range, with the official fees marked as verified. Timing lets you pick an arrival month and watch your deadlines move with it. Google and Apple both approved the update on 27 October.' },
       { title: 'No more endless spinner on Android', date: '27 Oct 2026', note: 'On one Android phone, Lola\'s first reply sometimes spun forever. Before Lola answers, the app asks Google Play to confirm it is a genuine install, and that check has no time limit of its own: if Google\'s side stalled, the app waited for good. The check now gives up after 15 seconds and Lola shows her normal "try again" message, and a failed check is retried properly on the next attempt. The iPhone\'s version of the check got the same time limit. A regression test covers it, and it ships in version 1.0.1 on both stores.' },
       { title: 'The website moved to a new host', date: '21 Oct 2026', note: 'getcamino.app now runs on Cloudflare instead of the app-build service\'s hosting, which stopped including custom web addresses on its free plan. Pages are served as plain files from a global network, and only the parts that need code run as a small program. It was tested in full on a separate address before the switch, and the domain\'s records were copied one for one, so email and sign-in carried on as normal. Nothing changes for you, and the phone apps needed no update.' },

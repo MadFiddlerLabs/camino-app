@@ -926,6 +926,16 @@ const ROWS: Row[] = [
       'Still count the cancels: analytics records each canceled security check, so we would see if the check started driving people away.',
     ],
   },
+  {
+    feature: 'A new key for every iPhone check',
+    date: '4 Nov 2026',
+    work: 'Before Lola answers on an iPhone, the app proves it is a genuine install with a key held in the phone\'s secure hardware. The app kept one key and reused it for every check, but Apple allows one check per key. An iPhone in Cupertino, very likely one of Apple\'s, stalled on that check four times in a row, so Lola could only show her retry message. The app now makes a new key for every check, so a key that stalls is never tried again. We can\'t reproduce the stall ourselves, so the next alert will show whether this cures it.',
+    decisions: [
+      'Follow Apple\'s rule rather than patch around it: deleting a key after a failure would still have reused good keys, so each check now gets its own key.',
+      'Keep nothing we don\'t need: the server judges each check alone and stores no keys, so the app stopped saving one.',
+      'Say what we don\'t know: the rule was broken and is now followed, but nothing yet proves the stall came from it, so this is logged as a fix to verify.',
+    ],
+  },
 ];
 
 export default function BuildLogScreen() {

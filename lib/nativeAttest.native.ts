@@ -14,11 +14,9 @@
  * created), so this ships harmlessly before the Play account is ready.
  */
 import { Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AppIntegrity from '@expo/app-integrity';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? '';
-const KEY_ID_STORAGE = 'camino.appattest.keyId';
 // Google Cloud project number tied to the Play app; required to prepare the Play Integrity provider.
 // Empty until the Play/Cloud project exists → the Android path stays inert (returns null).
 const CLOUD_PROJECT_NUMBER = process.env.EXPO_PUBLIC_GOOGLE_CLOUD_PROJECT_NUMBER ?? '';
@@ -58,12 +56,11 @@ async function attestIos(): Promise<string | null> {
   // On the simulator App Attest is unavailable (isSupported === false).
   if (!AppIntegrity.isSupported) return null;
 
-  // 1. A persistent Secure-Enclave key — generated once, keyId stored (the key never leaves it).
-  let keyId = await AsyncStorage.getItem(KEY_ID_STORAGE);
-  if (!keyId) {
-    keyId = await AppIntegrity.generateKeyAsync();
-    await AsyncStorage.setItem(KEY_ID_STORAGE, keyId);
-  }
+  // 1. A new Secure-Enclave key for every attestation. Apple allows one attestation per key, and
+  // attestKey can hang forever on a key it won't accept. We used to store one key and re-attest it
+  // each session, and an iPhone hung on four tries in a row (GETCAMINO-Q, 2026-11-04). The server
+  // keeps no key state and checks each attestation alone, so nothing needs the key afterwards.
+  const keyId = await AppIntegrity.generateKeyAsync();
   const challenge = await fetchChallenge();
   if (!challenge) return null;
 
