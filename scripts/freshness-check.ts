@@ -8,12 +8,15 @@
  *
  * Class SLOs: statutory/budget-law figures re-verify every ~180 days (they move each January);
  * procedural catalog steps every ~365 days. Exits non-zero on any staleness or dead link, which
- * fails the GitHub Action and emails the owner (see .github/workflows/freshness.yml).
+ * fails the GitHub Action and emails the owner (see .github/workflows/freshness.yml). A link the
+ * site wouldn't answer is listed as unverified and doesn't fail the job (scripts/freshness-links.ts);
+ * the stamps still force a person to open every source within its SLO.
  */
 import { CATALOG } from '../core/engine-controller';
 import { verifiedOn } from '../core/changelog';
 import { LEGAL_FIGURES } from '../core/legal-figures';
 import { REGIONAL_SPECIFICS } from '../core/regional-specifics';
+import { judgeLink, type LinkVerdict } from './freshness-links';
 
 const DAY = 86_400_000;
 const SLO = { statutory: 180, procedural: 365 } as const;
@@ -34,14 +37,14 @@ function collect(): Fact[] {
 
 const ageDays = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / DAY);
 
-async function linkDead(url: string): Promise<string | null> {
+async function checkLink(url: string): Promise<{ verdict: LinkVerdict; why: string }> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 15_000);
   try {
     const res = await fetch(url, { signal: ctrl.signal, redirect: 'follow', headers: { 'user-agent': 'GetCamino-FreshnessBot/1.0' } });
-    return res.status >= 400 ? `HTTP ${res.status}` : null;
+    return { verdict: judgeLink(url, res.status), why: `HTTP ${res.status}` };
   } catch (e) {
-    return `unreachable (${e instanceof Error ? e.message : 'error'})`;
+    return { verdict: judgeLink(url, null), why: `unreachable (${e instanceof Error ? e.message : 'error'})` };
   } finally {
     clearTimeout(t);
   }
@@ -57,22 +60,31 @@ async function main() {
   }
 
   const deadP: string[] = [];
+  const unverifiedP: string[] = [];
   if (!noNet) {
     const urls = [...new Set(facts.map(f => f.source_url).filter((u): u is string => !!u))];
     process.stdout.write(`[freshness] checking ${urls.length} source URLs...\n`);
-    const results = await Promise.all(urls.map(async u => ({ u, dead: await linkDead(u) })));
-    for (const { u, dead } of results) if (dead) deadP.push(`  🔗 DEAD ${u} — ${dead}`);
+    const results = await Promise.all(urls.map(async u => ({ u, ...(await checkLink(u)) })));
+    for (const { u, verdict, why } of results) {
+      if (verdict === 'dead') deadP.push(`  🔗 DEAD ${u} — ${why}`);
+      if (verdict === 'unverified') unverifiedP.push(`  ❔ UNVERIFIED ${u} — ${why}`);
+    }
   }
 
   const oldest = facts.reduce((a, b) => (ageDays(a.verified_at) >= ageDays(b.verified_at) ? a : b));
   process.stdout.write(`\n[freshness] ${facts.length} dated facts · oldest stamp: ${oldest.label} @ ${oldest.verified_at} (${ageDays(oldest.verified_at)}d)\n`);
+
+  if (unverifiedP.length) {
+    process.stdout.write(`\n[freshness] ${unverifiedP.length} links wouldn't answer this runner, so they weren't checked:\n`);
+    unverifiedP.forEach(l => process.stdout.write(l + '\n'));
+  }
 
   if (staleP.length || deadP.length) {
     process.stdout.write(`\n❌ freshness check FAILED — re-verify these against their official source:\n`);
     [...staleP, ...deadP].forEach(l => process.stdout.write(l + '\n'));
     process.exit(1);
   }
-  process.stdout.write(`✓ freshness OK — every dated fact is within its SLO${noNet ? ' (links not checked: --no-net)' : ' and every source URL resolves'}.\n`);
+  process.stdout.write(`✓ freshness OK — every dated fact is within its SLO${noNet ? ' (links not checked: --no-net)' : ' and no checked source URL is gone'}.\n`);
 }
 
 main();

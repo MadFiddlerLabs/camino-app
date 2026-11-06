@@ -19,5 +19,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Stamps + live link checks. Non-zero exit (stale stamp or dead URL) fails the job → email.
+      # Stamps + live link checks. Non-zero exit (stale stamp or a URL that is really gone) fails
+      # the job → email. Links a site wouldn't answer are listed in the log but don't fail it.
       - run: npm run freshness
